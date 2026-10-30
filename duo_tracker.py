@@ -39,12 +39,27 @@ def notify(title, msg, priority="urgent"):
 
 
 def fetch():
-    params = {"pl": "true", "parts.0": PART, "location": LOCATION}
-    r = requests.get(API, params=params, headers=HEADERS, timeout=15)
-    if r.status_code in (403, 429, 503):
-        raise RuntimeError(f"Apple is slowing us down (HTTP {r.status_code})")
-    r.raise_for_status()
-    return r.json()["body"]["stores"][:MAX_STORES]
+    # Apple rotates which stock-check address works, so try both.
+    attempts = [
+        ("https://www.apple.com/shop/fulfillment-messages",
+         {"fae": "true", "pl": "true", "mts.0": "regular", "parts.0": PART,
+          "searchNearby": "true", "location": LOCATION},
+         lambda j: j["body"]["content"]["pickupMessage"]["stores"]),
+        ("https://www.apple.com/shop/retail/pickup-message",
+         {"pl": "true", "parts.0": PART, "location": LOCATION},
+         lambda j: j["body"]["stores"]),
+    ]
+    last = None
+    for url, params, pick in attempts:
+        try:
+            r = requests.get(url, params=params, headers=HEADERS, timeout=15)
+            if r.status_code != 200:
+                last = RuntimeError(f"Apple said HTTP {r.status_code}")
+                continue
+            return pick(r.json())[:MAX_STORES]
+        except Exception as e:
+            last = e
+    raise last
 
 
 def main():
