@@ -8,7 +8,7 @@ import requests
 PART = "MK1E4LL/A"             # iPhone Duo 256GB Star White, US
 LOCATION = "07302"             # Jersey City; also searches nearby NYC/NJ stores
 NTFY_TOPIC = os.environ["NTFY_TOPIC"] # subscribe to this exact name in the ntfy app
-POLL_SECONDS = 60
+POLL_SECONDS = 20
 MAX_STORES = 12
 
 API = "https://www.apple.com/shop/retail/pickup-message"
@@ -87,7 +87,7 @@ def main():
             backoff = min(backoff + 1, 6)
             print(f"[{time.strftime('%I:%M %p')}] problem: {e} - waiting a bit")
             time.sleep(60 * backoff)
-        time.sleep(POLL_SECONDS + random.randint(5, 20))
+        time.sleep(POLL_SECONDS + random.randint(2, 8))
 
 
 if __name__ == "__main__":
