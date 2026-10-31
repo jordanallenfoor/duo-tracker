@@ -6,8 +6,10 @@ on:
 concurrency:
   group: duo-tracker
   cancel-in-progress: false
+# Apple sometimes blocks a cloud machine. Each job below runs on a fresh
+# machine and takes over when the one before it stops.
 jobs:
-  watch:
+  watch1:
     runs-on: ubuntu-latest
     timeout-minutes: 358
     steps:
@@ -20,3 +22,115 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           MAX_MINUTES: "345"
+  watch2:
+    needs: watch1
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch3:
+    needs: watch2
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch4:
+    needs: watch3
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch5:
+    needs: watch4
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch6:
+    needs: watch5
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch7:
+    needs: watch6
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
+  watch8:
+    needs: watch7
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 358
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python -u duo_tracker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "345"
+          QUIET: "true"
