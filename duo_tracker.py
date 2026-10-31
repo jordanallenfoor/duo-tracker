@@ -2,6 +2,7 @@
 """iPhone Duo in-store pickup tracker. Alerts your phone via the ntfy app."""
 import os
 import random
+import sys
 import time
 import requests
 
@@ -17,7 +18,7 @@ BUY_URL = "https://www.apple.com/shop/buy-iphone/iphone-duo"
 IN_CLOUD = bool(os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("GITHUB_ACTIONS"))
 WHERE = " (cloud)" if IN_CLOUD else " (Mac)"
 # GitHub runs repeat every few hours; only announce on a manual start
-ANNOUNCE = os.environ.get("GITHUB_EVENT_NAME", "workflow_dispatch") == "workflow_dispatch"
+ANNOUNCE = os.environ.get("GITHUB_EVENT_NAME", "workflow_dispatch") == "workflow_dispatch" and os.environ.get("QUIET") != "true"
 MAX_MINUTES = float(os.environ.get("MAX_MINUTES", "0"))  # 0 = run forever
 
 HEADERS = {
@@ -67,8 +68,8 @@ def main():
     try:
         stores = fetch()
     except Exception as e:
-        notify("Duo tracker problem" + WHERE, f"Couldn't reach Apple: {e}", priority="high")
-        raise
+        print(f"Apple refused this connection ({e}) - restarting on a fresh one")
+        sys.exit(3)
     if not stores or PART not in stores[0].get("partsAvailability", {}):
         raise SystemExit("Apple didn't recognize the part number.")
     title = (stores[0]["partsAvailability"][PART].get("messageTypes", {})
@@ -101,6 +102,9 @@ def main():
         except Exception as e:
             backoff = min(backoff + 1, 3)
             print(f"[{time.strftime('%I:%M %p')}] problem: {e} - waiting a bit")
+            if backoff >= 3:
+                print("Apple keeps refusing this connection - restarting on a fresh one")
+                sys.exit(3)
             time.sleep(60 * backoff)
         time.sleep(POLL_SECONDS + random.randint(5, 15))
 
